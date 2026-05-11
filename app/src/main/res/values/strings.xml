@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Auditoría de Depósitos</string>
+    <string name="title_activity_main">Auditoría de Depósitos</string>
+    <string name="package_name">com.leoigtm.gdweingel</string>
+    <string name="custom_url_scheme">com.leoigtm.gdweingel</string>
+</resources>
