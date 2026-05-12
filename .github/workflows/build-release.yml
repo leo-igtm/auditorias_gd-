@@ -18,11 +18,17 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Ensure keystore directory exists
+        run: mkdir -p keystore
+
       - name: Decode Keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          mkdir -p keystore
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "Error: KEYSTORE_BASE64 secret is not set!"
+            exit 1
+          fi
           echo "$KEYSTORE_BASE64" | base64 -d > keystore/release.jks
 
       - name: Create signing.properties
@@ -31,6 +37,11 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          if [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ] || [ -z "$KEY_PASSWORD" ]; then
+            echo "Error: One or more signing secrets are not set!"
+            echo "Required secrets: KEYSTORE_PASSWORD, KEY_ALIAS, KEY_PASSWORD"
+            exit 1
+          fi
           cat > signing.properties << EOF
           storeFile=keystore/release.jks
           storePassword=$KEYSTORE_PASSWORD
@@ -42,7 +53,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleRelease --stacktrace --info
 
       - name: Extract Version from Tag
         id: version
